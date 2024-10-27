@@ -1,0 +1,8 @@
+{
+    "stock_symbols": ["AAPL", "GOOGL", "MSFT"],
+    "data_sources": {
+        "AAPL": "yahoo_finance",
+        "GOOGL": "alpha_vantage",
+        "MSFT": "yahoo_finance"
+    }
+}

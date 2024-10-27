@@ -1,0 +1,13 @@
+# InfluxDB Connection
+Conn Id: influxdb
+Conn Type: HTTP
+Host: your_influxdb_host
+Port: your_influxdb_port
+Login: your_influxdb_org
+Password: your_influxdb_token
+
+# Slack Webhook Connection
+Conn Id: slack_webhook
+Conn Type: HTTP
+Host: hooks.slack.com
+Schema: https
