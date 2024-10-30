@@ -1,0 +1,28 @@
+# Dockerfile.airflow
+FROM apache/airflow:2.10.2
+
+USER root
+
+# System dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Copy project requirements
+COPY requirements.txt /tmp/requirements.txt
+
+# Install project dependencies
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Copy DAGs and plugins
+COPY airflow/dags /opt/airflow/dags
+COPY airflow/plugins /opt/airflow/plugins
+COPY src /opt/airflow/src
+COPY configs /opt/airflow/configs
+
+ENV CONFIG_PATH=/opt/airflow/configs
+ENV INFLUXDB_TOKEN=your_influxdb_token

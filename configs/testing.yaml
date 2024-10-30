@@ -1,0 +1,47 @@
+environment: testing
+debug: true
+
+data_sources:
+  yahoo_finance:
+    base_url: "https://query1.finance.yahoo.com/v8/finance/chart/"
+    rate_limit: 100
+    timeout: 10
+    retry_attempts: 2
+    batch_size: 50
+    
+  alpha_vantage:
+    base_url: "https://www.alphavantage.co/query"
+    api_key: "U3YSE0IPILYF13X4"
+    rate_limit: 100
+    timeout: 10
+    retry_attempts: 2
+    batch_size: 50
+
+pipeline:
+  symbols:
+    - AAPL
+    - GOOGL
+  default_timeframe: "1day"
+  lookback_days: 30
+  batch_size: 100
+  parallel_jobs: 2
+  retry_delay: 30
+
+storage:
+  influxdb:
+    url: "http://localhost:8086"
+    org: "test_org"
+    bucket: "test_data"
+    token: "test_token"
+    batch_size: 1000
+    timeout: 15
+
+monitoring:
+  metrics_enabled: true
+  logging_level: DEBUG
+  alert_levels:
+    critical: 1
+    warning: 2
+    info: 3
+  slack_alerts: false
+  email_alerts: false

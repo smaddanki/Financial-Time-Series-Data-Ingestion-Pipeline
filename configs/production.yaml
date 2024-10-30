@@ -1,0 +1,60 @@
+environment: production
+debug: false
+
+data_sources:
+  yahoo_finance:
+    base_url: "https://query1.finance.yahoo.com/v8/finance/chart/"
+    rate_limit: 5000
+    timeout: 30
+    retry_attempts: 5
+    batch_size: 500
+    
+  alpha_vantage:
+    base_url: "https://www.alphavantage.co/query"
+    api_key: "U3YSE0IPILYF13X4"
+    rate_limit: 1000
+    timeout: 30
+    retry_attempts: 5
+    batch_size: 500
+
+pipeline:
+  symbols:
+    - AAPL
+    - GOOGL
+    - MSFT
+    - AMZN
+    - META
+    - NFLX
+    - TSLA
+    - IBM
+    - ORCL
+    - CRM
+  default_timeframe: "1day"
+  lookback_days: 365
+  batch_size: 5000
+  parallel_jobs: 10
+  retry_delay: 60
+
+storage:
+  influxdb:
+    url: "${INFLUXDB_PROD_URL}"
+    org: "financial_org"
+    bucket: "market_data"
+    token: "${INFLUXDB_PROD_TOKEN}"
+    batch_size: 10000
+    timeout: 60
+
+monitoring:
+  metrics_enabled: true
+  logging_level: INFO
+  alert_levels:
+    critical: 1
+    warning: 2
+    info: 3
+  slack_alerts: true
+  email_alerts: true
+  alerting:
+    slack_webhook: "${SLACK_WEBHOOK_URL}"
+    email_recipients:
+      - "alerts@company.com"
+      - "operations@company.com"
