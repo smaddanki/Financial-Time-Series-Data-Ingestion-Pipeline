@@ -1,0 +1,50 @@
+environment: development
+debug: true
+
+data_sources:
+  yahoo_finance:
+    base_url: "https://query1.finance.yahoo.com/v8/finance/chart/"
+    rate_limit: 2000
+    timeout: 30
+    retry_attempts: 3
+    batch_size: 100
+    
+  alpha_vantage:
+    base_url: "https://www.alphavantage.co/query"
+    api_key: "U3YSE0IPILYF13X4"
+    rate_limit: 500
+    timeout: 30
+    retry_attempts: 3
+    batch_size: 100
+
+pipeline:
+  symbols:
+    - AAPL
+    - GOOGL
+    - MSFT
+    - AMZN
+    - META
+  default_timeframe: "1day"
+  lookback_days: 365
+  batch_size: 1000
+  parallel_jobs: 3
+  retry_delay: 60
+
+storage:
+  influxdb:
+    url: "http://localhost:8086"
+    org: "financial_org"
+    bucket: "market_data"
+    token: "${INFLUXDB_TOKEN}"
+    batch_size: 5000
+    timeout: 30
+
+monitoring:
+  metrics_enabled: true
+  logging_level: DEBUG
+  alert_levels:
+    critical: 1
+    warning: 2
+    info: 3
+  slack_alerts: true
+  email_alerts: true

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "financial_timeseries_pipeline"
+name = "Financial-Time-Series-Data-Ingestion-Pipeline"
 version = "0.1.0"
 description = "Financial Time Series Data Ingestion Pipeline"
 authors = ["Your Name <your.email@example.com>"]

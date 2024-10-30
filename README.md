@@ -1,53 +1,158 @@
-# docs/README.md
-# Financial Time Series Data Ingestion Pipeline
+# Financial Time Series Data Pipeline
 
-## Overview
-A scalable, robust pipeline for ingesting, processing, and storing financial time series data from multiple sources. The pipeline supports real-time and batch processing, with comprehensive monitoring and error handling.
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Testing](https://img.shields.io/badge/testing-pytest-yellow.svg)](https://docs.pytest.org/en/latest/)
+
+A robust, scalable pipeline for collecting, processing, and storing financial market data from multiple sources. Built with Python, Apache Airflow, and InfluxDB.
+
+## Features
+
+- 📊 Multi-source data collection (Yahoo Finance, Alpha Vantage)
+- 🔄 Real-time and batch processing capabilities
+- 📈 Automated technical indicator calculation
+- 💾 Scalable time-series data storage using InfluxDB
+- 📡 Comprehensive monitoring and alerting system
+- 🔄 Apache Airflow-based orchestration
+- 🐳 Docker containerization
+- ⚡ High performance and scalability
 
 ## Table of Contents
-1. [Architecture](architecture.md)
-2. [Installation](installation.md)
-3. [Configuration](configuration.md)
-4. [API Documentation](api.md)
-5. [Deployment Guide](deployment.md)
-6. [Development Guide](development.md)
-7. [Monitoring Guide](monitoring.md)
-8. [Troubleshooting Guide](troubleshooting.md)
 
-# docs/architecture.md
-# Architecture Documentation
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Monitoring](#monitoring)
+- [Contributing](#contributing)
+- [License](#license)
 
-## System Architecture
+## Requirements
 
-### Components
-1. **Data Collection Layer**
-   - Handles data acquisition from multiple sources
-   - Implements rate limiting and error handling
-   - Supports both real-time and batch collection
+- Python 3.9+
+- Docker and Docker Compose
+- Git
+- Poetry (Python package manager)
 
-2. **Processing Layer**
-   - Data validation and cleaning
-   - Technical indicator calculation
-   - Time series normalization
+## Quick Start
 
-3. **Storage Layer**
-   - InfluxDB for time series data
-   - Supports both real-time and batch storage
-   - Data partitioning and retention policies
+```bash
+# Clone repository
+git clone git@github.com:smaddanki/Financial-Time-Series-Data-Ingestion-Pipeline.git
+cd Financial-Time-Series-Data-Ingestion-Pipeline
 
-4. **Orchestration Layer**
-   - Apache Airflow for workflow management
-   - Task scheduling and dependency management
-   - Error handling and retries
+# Install dependencies
+poetry install
 
-5. **Monitoring Layer**
-   - Pipeline health monitoring
-   - Data quality checks
-   - Alert management
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
 
-### Data Flow
+# Start services
+docker-compose up -d
+
+# Run pipeline
+poetry run python -m src.cli run-pipeline
+```
+
+## Installation
+
+### Local Development Setup
+
+1. Install Python dependencies:
+```bash
+poetry install
+```
+
+2. Install pre-commit hooks:
+```bash
+poetry run pre-commit install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### Docker Setup
+
+1. Build and start services:
+```bash
+docker-compose up -d --build
+```
+
+2. Verify services are running:
+```bash
+docker-compose ps
+```
+
+## Configuration
+
+### Environment Variables
+
+Required environment variables:
+```plaintext
+ALPHA_VANTAGE_API_KEY=your_api_key
+INFLUXDB_URL=http://localhost:8086
+INFLUXDB_TOKEN=your_token
+INFLUXDB_ORG=your_org
+INFLUXDB_BUCKET=market_data
+```
+
+### Configuration Files
+
+The pipeline uses YAML configuration files located in the `configs/` directory:
+
+```yaml
+# configs/development.yaml
+environment: development
+debug: true
+
+data_sources:
+  yahoo_finance:
+    base_url: "https://query1.finance.yahoo.com/v8/finance/chart/"
+    rate_limit: 2000
+    timeout: 30
+```
+
+## Usage
+
+### Command Line Interface
+
+```bash
+# Run pipeline for specific symbols
+poetry run python -m src.cli run-pipeline --symbols AAPL,GOOGL
+
+# Backfill historical data
+poetry run python -m src.cli backfill --start-date 2024-01-01
+
+# Monitor pipeline status
+poetry run python -m src.cli status
+```
+
+### Airflow DAGs
+
+Access the Airflow UI at http://localhost:8080:
+
+1. Login with default credentials:
+   - Username: admin
+   - Password: admin
+
+2. Enable and trigger the DAG:
+   - DAG Name: financial_timeseries_pipeline
+   - Schedule: Daily at midnight
+
+## Architecture
+
 ```mermaid
-graph LR
+graph TD
     A[Data Sources] --> B[Collection Layer]
     B --> C[Processing Layer]
     C --> D[Storage Layer]
@@ -55,238 +160,116 @@ graph LR
     F[Monitoring Layer] --> B & C & D
 ```
 
-# docs/installation.md
-# Installation Guide
+### Components
 
-## Prerequisites
-- Python 3.9+
-- Docker and Docker Compose
-- Git
-- Poetry (Python package manager)
+- **Collection Layer**: Handles data acquisition from multiple sources
+- **Processing Layer**: Data validation, cleaning, and technical analysis
+- **Storage Layer**: Time-series data storage in InfluxDB
+- **Orchestration Layer**: Workflow management with Apache Airflow
+- **Monitoring Layer**: System health monitoring and alerting
 
-## Setup Steps
+## Development
 
-1. **Clone the Repository**
+### Project Structure
+
+```
+financial_timeseries_pipeline/
+├── airflow/              # Airflow DAGs and plugins
+├── configs/              # Configuration files
+├── docs/                 # Documentation
+├── notebooks/           # Jupyter notebooks
+├── scripts/             # Utility scripts
+├── src/                 # Source code
+│   ├── pipeline/        # Core pipeline components
+│   ├── utils/           # Utility functions
+│   └── monitoring/      # Monitoring components
+└── tests/               # Test suites
+```
+
+### Code Style
+
+The project uses:
+- Black for code formatting
+- isort for import sorting
+- flake8 for linting
+- mypy for type checking
+
+Run formatters:
 ```bash
-git clone https://github.com/your-org/financial-timeseries-pipeline.git
-cd financial-timeseries-pipeline
+poetry run black src/ tests/
+poetry run isort src/ tests/
 ```
 
-2. **Install Dependencies**
+## Testing
+
+Run tests using pytest:
+
 ```bash
-poetry install
+# Run all tests
+poetry run pytest
+
+# Run specific test types
+poetry run pytest tests/unit/
+poetry run pytest tests/integration/
+poetry run pytest tests/e2e/
+
+# Run tests with coverage
+poetry run pytest --cov=src tests/
 ```
 
-3. **Set Up Environment Variables**
+## Deployment
+
+### Production Deployment
+
+1. Build production image:
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+docker build -t financial-pipeline:prod -f Dockerfile.prod .
 ```
 
-4. **Start Services**
+2. Deploy to Kubernetes:
 ```bash
-docker-compose up -d
+kubectl apply -f k8s/
 ```
 
-5. **Initialize Airflow**
+### Monitoring Setup
+
+1. Access monitoring dashboards:
+   - Grafana: http://localhost:3000
+   - Prometheus: http://localhost:9090
+
+2. Configure alerts in `configs/alerts.yaml`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch:
 ```bash
-./scripts/init_airflow.sh
+git checkout -b feature/your-feature-name
 ```
 
-# docs/api.md
-# API Documentation
-
-## Core Components
-
-### DataCollector
-
-```python
-class DataCollector:
-    """Collects data from various financial data sources"""
-    
-    def collect_yahoo_finance(
-        self, 
-        symbol: str, 
-        start_date: str, 
-        end_date: str
-    ) -> pd.DataFrame:
-        """Collect data from Yahoo Finance"""
-```
-
-### DataProcessor
-
-```python
-class DataProcessor:
-    """Processes financial time series data"""
-    
-    def process_data(
-        self, 
-        df: pd.DataFrame
-    ) -> pd.DataFrame:
-        """Process raw financial data"""
-```
-
-### DataStorage
-
-```python
-class DataStorage:
-    """Handles data storage in InfluxDB"""
-    
-    def store_data(
-        self, 
-        df: pd.DataFrame, 
-        symbol: str
-    ) -> None:
-        """Store processed data"""
-```
-
-# docs/deployment.md
-# Deployment Guide
-
-## Production Deployment
-
-### Prerequisites
-- Kubernetes cluster
-- Helm
-- Access to container registry
-
-### Deployment Steps
-
-1. **Build Container Images**
+3. Make your changes and commit:
 ```bash
-docker build -t financial-pipeline:latest .
+git commit -m "Add your feature"
 ```
 
-2. **Push to Registry**
+4. Push to your fork:
 ```bash
-docker push your-registry/financial-pipeline:latest
+git push origin feature/your-feature-name
 ```
 
-3. **Deploy using Helm**
-```bash
-helm install financial-pipeline ./helm
-```
+5. Create a Pull Request
 
-4. **Verify Deployment**
-```bash
-kubectl get pods
-```
+Please ensure your PR:
+- Passes all tests
+- Includes relevant tests
+- Follows code style guidelines
+- Updates documentation as needed
 
-## Scaling Considerations
-- Horizontal pod autoscaling
-- Resource limits and requests
-- Database scaling
 
-# docs/development.md
-# Development Guide
+## Acknowledgments
 
-## Setting Up Development Environment
+- [Apache Airflow](https://airflow.apache.org/)
+- [InfluxDB](https://www.influxdata.com/)
+- [yfinance](https://github.com/ranaroussi/yfinance)
+- [Alpha Vantage](https://www.alphavantage.co/)
 
-1. **Install Development Tools**
-```bash
-poetry install --dev
-```
-
-2. **Set Up Pre-commit Hooks**
-```bash
-pre-commit install
-```
-
-3. **Run Tests**
-```bash
-pytest tests/
-```
-
-## Code Style
-
-### Python Style Guide
-- Follow PEP 8
-- Use type hints
-- Document all public functions
-- Maximum line length: 88 characters
-
-### Git Workflow
-1. Create feature branch
-2. Make changes
-3. Run tests
-4. Create pull request
-
-# docs/monitoring.md
-# Monitoring Guide
-
-## Metrics
-
-### Pipeline Metrics
-- Processing time
-- Success rate
-- Data volume
-- Error rate
-
-### Data Quality Metrics
-- Missing values
-- Anomalies
-- Data freshness
-
-### System Metrics
-- CPU usage
-- Memory usage
-- Disk I/O
-- Network I/O
-
-## Alerts
-
-### Alert Levels
-1. **Critical**
-   - Pipeline failure
-   - Data quality issues
-   - System resource exhaustion
-
-2. **Warning**
-   - High latency
-   - Increased error rate
-   - Resource usage warnings
-
-3. **Info**
-   - Pipeline completion
-   - Data updates
-   - System status changes
-
-# docs/troubleshooting.md
-# Troubleshooting Guide
-
-## Common Issues
-
-### Data Collection Issues
-1. **API Rate Limiting**
-   - Symptom: Frequent API failures
-   - Solution: Adjust rate limiter settings
-
-2. **Data Quality Issues**
-   - Symptom: Missing or invalid data
-   - Solution: Check data source and validation rules
-
-### Pipeline Issues
-1. **Task Failures**
-   - Symptom: Airflow task failures
-   - Solution: Check logs and retry policy
-
-2. **Performance Issues**
-   - Symptom: Slow processing
-   - Solution: Check resource usage and scaling
-
-## Debugging Steps
-
-1. **Check Logs**
-```bash
-kubectl logs -l app=financial-pipeline
-```
-
-2. **Verify Configurations**
-```bash
-kubectl describe configmap financial-pipeline-config
-```
-
-3. **Check Metrics**
-```bash
-kubectl port-forward svc/prometheus 9090:9090
-```

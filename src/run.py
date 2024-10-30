@@ -5,10 +5,11 @@ from typing import Dict, List, Any
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.empty import EmptyOperator
+from airflow.operators.dummy import DummyOperator
 from airflow.models import Variable
 from airflow.hooks.base import BaseHook
 from airflow.utils.task_group import TaskGroup
+from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.exceptions import AirflowException
 
 import pandas as pd
@@ -34,7 +35,7 @@ default_args = {
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2024, 1, 1),
-    # 'email': Variable.get('alert_email', 'alerts@company.com'),
+    'email': Variable.get('alert_email', 'alerts@company.com'),
     'execution_timeout': timedelta(hours=1),
     'sla': timedelta(hours=2)
 }
@@ -84,7 +85,7 @@ class FinancialPipelineDAG:
             # Collect data
             data = collector.collect_data(
                 symbol=symbol,
-                source='yahoo_finance',
+                source=self.config['pipeline']['data_sources'][symbol],
                 start_date=start_date,
                 end_date=end_date
             )
@@ -214,7 +215,7 @@ class FinancialPipelineDAG:
         
         with dag:
             # Start pipeline
-            start_pipeline = EmptyOperator(
+            start_pipeline = DummyOperator(
                 task_id='start_pipeline'
             )
             
@@ -252,19 +253,20 @@ class FinancialPipelineDAG:
                 # Add symbol group to main flow
                 initialize_components >> symbol_group
                 
-            # # Monitor metrics
-            # monitor_metrics = PythonOperator(
-            #     task_id='monitor_metrics',
-            #     python_callable=self._monitor_metrics
-            # )
+            # Monitor metrics
+            monitor_metrics = PythonOperator(
+                task_id='monitor_metrics',
+                python_callable=self._monitor_metrics
+            )
             
             # End pipeline
-            end_pipeline = EmptyOperator(
+            end_pipeline = DummyOperator(
                 task_id='end_pipeline'
             )
             
-            # # Set final dependencies
-            # start_pipeline >> initialize_components >> end_pipeline
+            # Set final dependencies
+            start_pipeline >> initialize_components
+            monitor_metrics >> end_pipeline
             
         return dag
 
